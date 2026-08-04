@@ -23,26 +23,32 @@ windows_bare_metal = False
 is_first_run = True
 
 # Let's not run actions twice
+previous_light_state = True
 current_state = ""
 
 while True:
+
+    time.sleep(10)
 
     response = requests.get("http://state.serpents.friedmicro-lab.org")
     if response.ok:
         body = response.json()
         if "den_light" in body:
             light_state = body["den_light"]
-            if light_state == "off":
+            if light_state == "off" and previous_light_state:
+                print("Lights are off updating state")
                 is_first_run = True
                 current_state = ""
+                run_command("ddcutil setvcp D6 04 --display 2")
                 requests.post(
                     "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
                 )
                 time.sleep(60)
-                run_command("ddcutil setvcp D6 04 --display 2")
+                previous_light_state = False
                 continue
+            else:
+                previous_light_state = True
 
-    time.sleep(10)
     usb_output = run_command("lsusb")
     if not "Razer" in usb_output:
         usb_connected = False
