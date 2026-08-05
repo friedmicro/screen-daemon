@@ -46,7 +46,7 @@ while True:
                 time.sleep(60)
                 previous_light_state = False
                 continue
-            elif light_state == "off"
+            elif light_state == "off":
                 continue
             else:
                 previous_light_state = True
