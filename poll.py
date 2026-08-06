@@ -30,26 +30,29 @@ while True:
 
     time.sleep(10)
 
-    response = requests.get("http://state.serpents.friedmicro-lab.org")
-    if response.ok:
-        body = response.json()
-        if "den_light" in body:
-            light_state = body["den_light"]
-            if light_state == "off" and previous_light_state:
-                print("Lights are off updating state")
-                is_first_run = True
-                current_state = ""
-                run_command("ddcutil setvcp D6 04 --display 2")
-                requests.post(
-                    "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
-                )
-                time.sleep(60)
-                previous_light_state = False
-                continue
-            elif light_state == "off":
-                continue
-            else:
-                previous_light_state = True
+    try:
+        response = requests.get("http://state.serpents.friedmicro-lab.org")
+        if response.ok:
+            body = response.json()
+            if "den_light" in body:
+                light_state = body["den_light"]
+                if light_state == "off" and previous_light_state:
+                    print("Lights are off updating state")
+                    is_first_run = True
+                    current_state = ""
+                    run_command("ddcutil setvcp D6 04 --display 2")
+                    requests.post(
+                        "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
+                    )
+                    time.sleep(60)
+                    previous_light_state = False
+                    continue
+                elif light_state == "off":
+                    continue
+                else:
+                    previous_light_state = True
+    except Exception as e:
+        print(f"Error on Time API, possibly a network disconnection...logging for future reference, {e}")
 
     usb_output = run_command("lsusb")
     if not "Razer" in usb_output:
