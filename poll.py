@@ -65,15 +65,21 @@ while True:
         print("Running as thin client")
         current_state = "thin_client"
         if not is_first_run:
+            try:
+                requests.post(
+                    "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
+                )
+                time.sleep(60)
+            except Exception as e:
+                print(e)
+        run_command("ddcutil setvcp D6 01 --display 1")
+        try:
             requests.post(
-                "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
+                "http://serpent.friedmicro-lab.org:8123/api/webhook/-VxyHGjPzcz9dv7_Vevuytvc9"
             )
             time.sleep(60)
-        run_command("ddcutil setvcp D6 01 --display 1")
-        requests.post(
-            "http://serpent.friedmicro-lab.org:8123/api/webhook/-VxyHGjPzcz9dv7_Vevuytvc9"
-        )
-        time.sleep(60)
+        except Exception as e:
+            print(e)
     # Windows bare metal
     elif (
         usb_connected == False
@@ -84,13 +90,16 @@ while True:
         current_state = "windows_bare_metal"
         run_command("ddcutil setvcp D6 04 --display 2")
         # run_command("killall Hyprland")
-        requests.post(
-            "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
-        )
-        time.sleep(60)
-        requests.post(
-            "http://serpent.friedmicro-lab.org:8123/api/webhook/-2vo8dhzah-34sBY9-q_cGP8K"
-        )
+        try:
+            requests.post(
+                "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
+            )
+            time.sleep(60)
+            requests.post(
+                "http://serpent.friedmicro-lab.org:8123/api/webhook/-2vo8dhzah-34sBY9-q_cGP8K"
+            )
+        except Exception as e:
+            print(e)
     # Work KVM
     elif (
         usb_connected == False
@@ -101,11 +110,14 @@ while True:
         current_state = "work_kvm"
         run_command("ddcutil setvcp D6 04 --display 2")
         # run_command("killall Hyprland")
-        requests.post(
-            "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
-        )
-        time.sleep(60)
-        requests.post(
-            "http://serpent.friedmicro-lab.org:8123/api/webhook/-2vo8dhzah-34sBY9-q_cGP8K"
-        )
+        try:
+            requests.post(
+                "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
+            )
+            time.sleep(60)
+            requests.post(
+                "http://serpent.friedmicro-lab.org:8123/api/webhook/-2vo8dhzah-34sBY9-q_cGP8K"
+            )
+        except Exception as e:
+            print(e)
     is_first_run = False
