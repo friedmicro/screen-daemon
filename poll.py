@@ -37,6 +37,7 @@ while True:
             if "den_light" in body:
                 light_state = body["den_light"]
                 if light_state == "off" and previous_light_state:
+                    run_command("killall Hyprland")
                     print("Lights are off updating state")
                     is_first_run = True
                     current_state = ""
