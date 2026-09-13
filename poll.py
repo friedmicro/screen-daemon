@@ -65,6 +65,7 @@ while True:
         print("Running as thin client")
         current_state = "thin_client"
         if not is_first_run:
+            run_command("killall Hyprland")
             try:
                 requests.post(
                     "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
@@ -89,6 +90,7 @@ while True:
         print("Running as Windows bare metal")
         current_state = "windows_bare_metal"
         run_command("ddcutil setvcp D6 04 --display 2")
+        run_command("killall Hyprland")
         # run_command("killall Hyprland")
         try:
             requests.post(
@@ -109,7 +111,7 @@ while True:
         print("Running as work KVM")
         current_state = "work_kvm"
         run_command("ddcutil setvcp D6 04 --display 2")
-        # run_command("killall Hyprland")
+        run_command("killall Hyprland")
         try:
             requests.post(
                 "http://serpent.friedmicro-lab.org:8123/api/webhook/-8nHLkTeXXh2i2xZGMsXYfu47"
