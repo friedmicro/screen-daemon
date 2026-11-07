@@ -20,7 +20,8 @@ const (
 
 	windowsBareMetalFile = "/tmp/windows-bare-metal"
 	pollInterval         = 10 * time.Second
-	delayForHardware     = 60 * time.Second
+	delayForHardware     = time.Minute
+	delayForWebhookRetry = 5 * time.Minute
 
 	displayOn  = "01"
 	displayOff = "04"
@@ -81,14 +82,14 @@ func postWebhook(url string) {
 	for true {
 		resp, err := httpClient.Post(url, "", nil)
 		if err != nil {
-			time.Sleep(5 * time.Minute)
+			time.Sleep(delayForWebhookRetry)
 			continue
 		}
 		defer resp.Body.Close()
 		io.Copy(io.Discard, resp.Body)
 
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			time.Sleep(5 * time.Minute)
+			time.Sleep(delayForWebhookRetry)
 			continue
 		}
 		break
