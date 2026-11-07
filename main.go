@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -103,20 +104,33 @@ func displaysOff() {
 	time.Sleep(delayForHardware)
 }
 
+func windowsBareMetalIsLoaded() bool {
+	_, err := os.Stat(windowsBareMetalFile)
+	if err == nil {
+		return true
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	return false
+}
+
 func handleHomeAutomations() bool {
 	lightOff, lightOK, err := getLightState()
 	if err != nil {
 		fmt.Printf("Error on State API, possibly a network disconnection...logging for future reference, %v\n", err)
 	}
 
+	windowsBareMetalActive := windowsBareMetalIsLoaded()
+
 	if lightOK {
 		switch {
-		case lightOff && previousLightState:
+		case lightOff && previousLightState && !windowsBareMetalActive:
 			firstRun = true
 			displaysOff()
 			previousLightState = false
 			return true
-		case lightOff:
+		case lightOff && !windowsBareMetalActive:
 			return true
 		default:
 			previousLightState = true
@@ -180,9 +194,7 @@ func main() {
 		}
 
 		usbConnected := isUSBConnected()
-
-		_, markerErr := os.Stat(windowsBareMetalFile)
-		windowsBareMetalActive := markerErr == nil
+		windowsBareMetalActive := windowsBareMetalIsLoaded()
 
 		if usbConnected && !windowsBareMetalActive && currentModeState != modeThinClient {
 			thinClient()
