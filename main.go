@@ -75,26 +75,23 @@ func getLightState() (lightOff, ok bool, err error) {
 	return *raw.DenLight == "off", true, nil
 }
 
-func postWebhook(url string) error {
-	resp, err := httpClient.Post(url, "", nil)
-	if err != nil {
-		return fmt.Errorf("webhook POST %s: %w", url, err)
-	}
-	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+func postWebhook(url string) {
+	fmt.Println(url)
+	for true {
+		resp, err := httpClient.Post(url, "", nil)
+		if err != nil {
+			time.Sleep(5 * time.Minute)
+			continue
+		}
+		defer resp.Body.Close()
+		io.Copy(io.Discard, resp.Body)
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("webhook POST %s returned status %d", url, resp.StatusCode)
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			time.Sleep(5 * time.Minute)
+			continue
+		}
+		break
 	}
-	return nil
-}
-
-func postWebhookLogged(url string) error {
-	if err := postWebhook(url); err != nil {
-		fmt.Printf("error: %v\n", err)
-		return err
-	}
-	return nil
 }
 
 func displaysOff() {
@@ -102,14 +99,14 @@ func displaysOff() {
 	fmt.Println("Lights are off updating state")
 	currentModeState = modeUnknown
 	runCommand("ddcutil", "setvcp", "D6", displayOff, "--display", "2")
-	postWebhookLogged(webhookDenLight)
+	postWebhook(webhookDenLight)
 	time.Sleep(delayForHardware)
 }
 
 func handleHomeAutomations() bool {
 	lightOff, lightOK, err := getLightState()
 	if err != nil {
-		fmt.Printf("Error on Time API, possibly a network disconnection...logging for future reference, %v\n", err)
+		fmt.Printf("Error on State API, possibly a network disconnection...logging for future reference, %v\n", err)
 	}
 
 	if lightOK {
@@ -146,14 +143,12 @@ func thinClient() {
 	currentModeState = modeThinClient
 	if !firstRun {
 		killWindowSystem()
-		if err := postWebhookLogged(webhookDenLight); err == nil {
-			time.Sleep(delayForHardware)
-		}
-	}
-	runCommand("ddcutil", "setvcp", "D6", displayOn, "--display", "1")
-	if err := postWebhookLogged(webhookThinClient); err == nil {
+		postWebhook(webhookDenLight)
 		time.Sleep(delayForHardware)
 	}
+	runCommand("ddcutil", "setvcp", "D6", displayOn, "--display", "1")
+	postWebhook(webhookThinClient)
+	time.Sleep(delayForHardware)
 }
 
 func windowsBareMetal() {
@@ -161,10 +156,9 @@ func windowsBareMetal() {
 	currentModeState = modeWindowsBareMetal
 	runCommand("ddcutil", "setvcp", "D6", displayOff, "--display", "2")
 	killWindowSystem()
-	if err := postWebhookLogged(webhookDenLight); err == nil {
-		time.Sleep(delayForHardware)
-	}
-	postWebhookLogged(webhookWindowsBare)
+	postWebhook(webhookDenLight)
+	time.Sleep(delayForHardware)
+	postWebhook(webhookWindowsBare)
 }
 
 func workKVM() {
@@ -172,10 +166,9 @@ func workKVM() {
 	currentModeState = modeWorkKVM
 	runCommand("ddcutil", "setvcp", "D6", displayOff, "--display", "2")
 	killWindowSystem()
-	if err := postWebhookLogged(webhookDenLight); err == nil {
-		time.Sleep(delayForHardware)
-	}
-	postWebhookLogged(webhookWindowsBare)
+	postWebhook(webhookDenLight)
+	time.Sleep(delayForHardware)
+	postWebhook(webhookWindowsBare)
 }
 
 func main() {
